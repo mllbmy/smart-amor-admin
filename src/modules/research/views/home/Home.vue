@@ -2,7 +2,7 @@
   <a-layout class="layout-content">
     <header class="layout-header leading-normal">
       <div class="text-center py-4 relative">
-        <h1 class="text-4xl">精益求“晶”</h1>
+        <h1 class="text-4xl">晶工巧匠</h1>
         <p class="text-lg text-[#00bcd4]">
           ——基于AI大模型的非晶合金材料与工艺智能优化系统——
         </p>

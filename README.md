@@ -1,4 +1,4 @@
-# SmartAmor Admin - 精益求"晶"
+# SmartAmor Admin - 晶工巧匠
 
 > 基于AI大模型的非晶合金材料与工艺智能优化系统
 
