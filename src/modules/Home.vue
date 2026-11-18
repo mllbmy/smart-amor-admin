@@ -4,7 +4,16 @@
       <div class="text-center py-4 relative page-header flex justify-between items-start px-6"
         style="background-size: 100% 100%">
         <div class="flex-1">
-          <div class="home-brand">精益求“晶”</div>
+          <div class="school-brand">
+            <div class="school-name">深圳信息职业技术大学</div>
+            <div class="school-name-en">SHENZHEN UNIVERSITY OF INFORMATION TECHNOLOGY</div>
+            <div class="school-honors">
+              <span>国家示范性软件职业技术学院</span>
+              <span>国家优质高职院校</span>
+              <span>国家示范(骨干)高职院校建设项目验收优秀单位</span>
+              <span>国家第一轮“双高计划”学校绩效评价“优”等单位</span>
+            </div>
+          </div>
         </div>
         <div class="flex-2">
           <h1 class="text-4xl">精益求“晶”</h1>
@@ -449,21 +458,44 @@ onMounted(() => {
   padding-top: 15px;
 }
 
-/* 左上角品牌文字（替换原校徽图片） */
-.home-brand {
-  display: inline-block;
-  margin-top: 12px;
+/* 左上角学校信息（原校徽图片改为文字，徽标图形已去掉） */
+.school-brand {
+  display: block;
+  width: fit-content;
+  margin-top: 2px;
   padding-left: 12px;
   border-left: 3px solid #00bcd4;
-  font-size: 23px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  line-height: 1.2;
-  background: linear-gradient(180deg, #ffffff 0%, #9df0ff 55%, #00bcd4 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 6px rgba(0, 188, 212, 0.35));
+  line-height: 1.25;
+  text-align: left;
   user-select: none;
+}
+
+.school-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 188, 212, 0.5), 0 0 20px rgba(0, 188, 212, 0.22);
+}
+
+.school-name-en {
+  margin-top: 2px;
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  color: #8fdcea;
+}
+
+.school-honors {
+  display: flex;
+  flex-direction: column;
+  margin-top: 3px;
+}
+
+.school-honors span {
+  font-size: 8.5px;
+  line-height: 1.32;
+  color: #d7eef7;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(0, 18, 32, 0.85);
 }
 </style>
