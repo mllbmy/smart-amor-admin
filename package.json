@@ -1,0 +1,34 @@
+{
+  "name": "smart-amor-admin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "@tailwindcss/vite": "^4.1.14",
+    "ant-design-vue": "~4.2.6",
+    "axios": "^1.13.1",
+    "echarts": "^6.0.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
+    "lodash-es": "^4.17.21",
+    "tailwindcss": "^4.1.14",
+    "vue": "^3.5.21",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.2",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "less": "^4.4.2",
+    "path": "^0.12.7",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.7",
+    "vue-tsc": "^3.0.7"
+  }
+}

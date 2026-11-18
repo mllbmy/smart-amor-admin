@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+h1,
+h2,
+h3,
+ul,
+p {
+  margin: 0;
+}
+
+.app-container {
+  /* background: url("../assets/bg.png") no-repeat fixed center; */
+  background: url("../assets/bg.png") no-repeat left top;
+  background-size: 100% 100%;
+  /* background-position: center; */
+  background-repeat: no-repeat;
+}
+
+.layout-sider,
+.layout-content {
+  background-color: transparent !important;
+  /* background-color: #182337cc !important; */
+}
+
+.layout-footer,
+.layout-header,
+.layout-sider-menu,
+.layout-sider>* {
+  background-color: transparent !important;
+}
+
+.page-header {
+  background: url(../assets/bg/page_header.png) no-repeat center center;
+  /* background: url(../assets/53titlebg.png) no-repeat center center; */
+  background-size: 65% 100%;
+}
+
+.alert-badge {
+  background: rgba(255, 77, 77, 0.2);
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-left: 10px;
+  animation: pulse-red 2s infinite;
+  font-weight: bolder;
+}
+
+.tech-border {
+  border: 2px solid #00bfffd8;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
+  position: relative;
+  z-index: 10;
+}
+
+/* 核心边框的角部装饰 */
+.tech-border::before,
+.tech-border::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #00bfff;
+  border-style: solid;
+  z-index: 20;
+}
+
+.tech-border::before {
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+
+.tech-border::after {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 2px 2px 0;
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 77, 77, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
+  }
+}

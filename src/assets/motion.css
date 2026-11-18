@@ -1,0 +1,263 @@
+/* ============================================================
+   全局动效与交互增强层
+   —— 统一节奏：快速反馈 0.18s / 常规过渡 0.28s
+   —— 只加视觉与过渡，不改动任何业务布局尺寸
+   ============================================================ */
+
+:root {
+  --motion-fast: 0.18s;
+  --motion-base: 0.28s;
+  --motion-slow: 0.45s;
+  --motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --accent: #00bcd4;
+  --accent-soft: rgba(0, 188, 212, 0.16);
+}
+
+/* ---------- 1. 路由切换过渡 ---------- */
+.fade-slide-enter-active {
+  transition: opacity 0.18s var(--motion-ease), transform 0.18s var(--motion-ease);
+}
+.fade-slide-leave-active {
+  transition: opacity 0.02s ease, transform 0.02s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-3px);
+}
+
+/* 主标题呼吸光（大屏质感，不影响布局） */
+@keyframes title-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 8px rgba(0, 188, 212, 0.25);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(0, 188, 212, 0.55);
+  }
+}
+.layout-header h1 {
+  animation: title-glow 4.2s ease-in-out infinite;
+}
+
+/* ---------- 2. 顶部路由进度条 ---------- */
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  z-index: 2000;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, #00bcd4 0%, #5eead4 60%, #ffffff 100%);
+  box-shadow: 0 0 12px rgba(0, 188, 212, 0.9);
+  transition: width 0.24s ease, opacity 0.3s ease;
+}
+.route-progress.is-active {
+  opacity: 1;
+}
+.route-progress.is-finishing {
+  opacity: 0;
+  transition: width 0.2s ease, opacity 0.35s ease 0.05s;
+}
+
+/* ---------- 3. 面板 / 卡片悬停反馈 ---------- */
+.home-card {
+  transition: transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+.home-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 188, 212, 0.22);
+  border-color: rgba(0, 188, 212, 0.85);
+}
+
+/* 统计数字卡（首页四宫格） */
+.stat-card {
+  transition: transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+  will-change: transform;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(0, 188, 212, 0.28);
+  background-color: rgba(0, 188, 212, 0.06);
+}
+.stat-card .stat-num {
+  transition: text-shadow var(--motion-base) ease;
+}
+.stat-card:hover .stat-num {
+  text-shadow: 0 0 18px rgba(0, 188, 212, 0.75);
+}
+
+/* 材料卡片：轻微抬升 + 边框发光 */
+.ant-card {
+  transition: transform var(--motion-base) var(--motion-ease),
+    box-shadow var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
+}
+.ant-card:hover {
+  border-color: rgba(0, 188, 212, 0.55);
+  box-shadow: 0 8px 22px rgba(0, 188, 212, 0.14);
+}
+
+/* ---------- 4. 按钮 / 菜单 / 表格交互 ---------- */
+.ant-btn {
+  transition: transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    filter var(--motion-fast) ease !important;
+}
+.ant-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 188, 212, 0.28);
+}
+.ant-btn:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+
+.layout-sider-menu .ant-menu-item,
+.layout-sider-menu .ant-menu-submenu-title {
+  transition: transform var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+.layout-sider-menu .ant-menu-item:hover,
+.layout-sider-menu .ant-menu-submenu-title:hover {
+  transform: translateX(4px);
+}
+.layout-sider-menu .ant-menu-item-selected {
+  box-shadow: inset 3px 0 0 0 var(--accent);
+}
+
+.ant-table-tbody > tr.ant-table-row {
+  transition: background-color var(--motion-fast) ease, transform var(--motion-fast) var(--motion-ease);
+}
+.ant-table-tbody > tr.ant-table-row:hover {
+  background-color: rgba(0, 188, 212, 0.09) !important;
+}
+
+/* 输入框聚焦发光 */
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  transition: box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease !important;
+}
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.18) !important;
+}
+
+/* ---------- 5. 进场动画：上浮 + 淡入，可错峰 ---------- */
+@keyframes fade-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in-soft {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(0, 191, 255, 0.7);
+  }
+}
+
+.anim-fade-up {
+  animation: fade-up-in var(--motion-slow) var(--motion-ease) both;
+}
+.anim-fade-in {
+  animation: fade-in-soft var(--motion-slow) ease both;
+}
+
+/* 让同一容器内的直接子项错峰进场（最多 12 项） */
+.anim-stagger > * {
+  animation: fade-up-in 0.42s var(--motion-ease) both;
+}
+.anim-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.anim-stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.anim-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.anim-stagger > *:nth-child(4) { animation-delay: 0.17s; }
+.anim-stagger > *:nth-child(5) { animation-delay: 0.22s; }
+.anim-stagger > *:nth-child(6) { animation-delay: 0.27s; }
+.anim-stagger > *:nth-child(7) { animation-delay: 0.31s; }
+.anim-stagger > *:nth-child(8) { animation-delay: 0.35s; }
+.anim-stagger > *:nth-child(9) { animation-delay: 0.38s; }
+.anim-stagger > *:nth-child(10) { animation-delay: 0.41s; }
+.anim-stagger > *:nth-child(11) { animation-delay: 0.44s; }
+.anim-stagger > *:nth-child(n + 12) { animation-delay: 0.46s; }
+
+/* 科技边框呼吸光（原有 tech-border 上叠加） */
+.tech-border {
+  animation: glow-breathe 3.6s ease-in-out infinite;
+}
+
+/* ---------- 6. 加载骨架流光 ---------- */
+@keyframes shimmer-move {
+  from {
+    background-position: -220% 0;
+  }
+  to {
+    background-position: 220% 0;
+  }
+}
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(0, 188, 212, 0.16) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 220% 100%;
+  animation: shimmer-move 1.4s linear infinite;
+  border-radius: 6px;
+}
+
+/* ---------- 7. 滚动条（避免默认样式割裂） ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 188, 212, 0.45);
+  border-radius: 4px;
+  transition: background var(--motion-fast) ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 212, 0.8);
+}
+
+/* ---------- 8. 无障碍：尊重系统"减少动态效果" ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
