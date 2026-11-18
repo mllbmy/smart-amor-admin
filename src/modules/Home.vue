@@ -4,7 +4,7 @@
       <div class="text-center py-4 relative page-header flex justify-between items-start px-6"
         style="background-size: 100% 100%">
         <div class="flex-1">
-          <img :src="ASSET_BASE + 'logo20250925.png'" alt="" />
+          <div class="home-brand">精益求“晶”</div>
         </div>
         <div class="flex-2">
           <h1 class="text-4xl">精益求“晶”</h1>
@@ -447,5 +447,23 @@ onMounted(() => {
 
 .body h1+*:not(span) {
   padding-top: 15px;
+}
+
+/* 左上角品牌文字（替换原校徽图片） */
+.home-brand {
+  display: inline-block;
+  margin-top: 12px;
+  padding-left: 12px;
+  border-left: 3px solid #00bcd4;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1.2;
+  background: linear-gradient(180deg, #ffffff 0%, #9df0ff 55%, #00bcd4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 6px rgba(0, 188, 212, 0.35));
+  user-select: none;
 }
 </style>
