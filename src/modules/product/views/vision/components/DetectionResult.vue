@@ -19,7 +19,7 @@
                 <span class="text-xl">{{ col.title }}：</span>
                 <span :class="col.status" class="text-xl">{{ col.value }}</span>
             </a-flex>
-            <p class="summary text-xl">缺陷摘要：共{{ failCount }} 处缺陷</p>
+            <p class="summary text-xl">指标未达标：{{ failCount }} 项</p>
         </div>
         <div v-else>
             <a-flex align="center" justify="center" vertical>

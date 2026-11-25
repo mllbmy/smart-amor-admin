@@ -31,7 +31,8 @@ import Detection, { type Marker } from "./components/Detection.vue";
 import DetectionResult from "./components/DetectionResult.vue";
 import Report from "./components/Report.vue";
 import type { DetectionResultData } from "../../types/DetectionResult";
-import { getRandomNumber, loadLocationData } from "@/utils/tools";
+import { getRandomNumber, formatDateTime, loadLocationData } from "@/utils/tools";
+import { makeVisionSummary } from "./demoVisionData";
 const detectionResultColumData = ref<DetectionResultData>();
 const reportData = ref<ReportData>();
 const deleteReportData = ref<number>();
@@ -39,7 +40,7 @@ const locateDefectData = ref<ReportData>();
 const deleteMarkerKey = ref<number>();
 function searchResultHandler(results: DetectionResultData) {
   detectionResultColumData.value = results;
-  localStorage.setItem("detectionResultColumData", JSON.stringify(results));
+  localStorage.setItem("detectionResultColumData_v2", JSON.stringify(results));
 
 }
 function markersUpdateHandle(marker: Marker) {
@@ -58,7 +59,21 @@ function detectionResetHandle() {
   // detectionResultColumData.value = null;
 }
 onMounted(() => {
-  loadLocationData("detectionResultColumData", detectionResultColumData);
+  const hasCache = loadLocationData(
+    "detectionResultColumData_v2",
+    detectionResultColumData
+  );
+  // 首次进入（无历史缓存）时给一份演示摘要，避免面板显示"暂无数据"
+  if (!hasCache || !detectionResultColumData.value) {
+    detectionResultColumData.value = {
+      date: formatDateTime(new Date()),
+      columns: makeVisionSummary().columns,
+    } as DetectionResultData;
+    localStorage.setItem(
+      "detectionResultColumData_v2",
+      JSON.stringify(detectionResultColumData.value)
+    );
+  }
 });
 function markersHandle(marker: Marker): ReportData {
   const types = [
@@ -89,9 +104,10 @@ function markersHandle(marker: Marker): ReportData {
       key: marker.key,
       type: types[getRandomNumber(0, types.length - 1)] as string,
       level: levels[getRandomNumber(0, levels.length - 1)] as string,
+      // 位置取标记点的实际坐标，便于"定位"时与画面标记对应
       position: {
-        x: Math.floor(Math.random() * 500),
-        y: Math.floor(Math.random() * 500),
+        x: Math.round(marker.x),
+        y: Math.round(marker.y),
       },
     };
   }

@@ -75,6 +75,7 @@ import type { Ref, UnwrapRef } from "vue";
 import { CheckOutlined, EditOutlined } from "@ant-design/icons-vue";
 import { cloneDeep } from "lodash-es";
 import { formatDateTime, htmlToPdf, loadLocationData } from "@/utils/tools";
+import { DEMO_DEFECTS } from "../demoVisionData";
 
 const searchValue = ref("");
 // 修改: 添加emit定义用于传递定位事件
@@ -170,7 +171,7 @@ function getLevelName(level: string) {
 }
 
 watch(dataSource, (val: any) => {
-  localStorage.setItem("visonReportDataSource", JSON.stringify(val));
+  localStorage.setItem("visonReportDataSource_v2", JSON.stringify(val));
 },
   {
     deep: true,
@@ -220,8 +221,17 @@ const onDelete = (key: number) => {
   emit("marker:delete", key);
 };
 onMounted(() => {
-  loadLocationData("visonReportDataSource", dataSource)
-})
+  loadLocationData("visonReportDataSource_v2", dataSource);
+  // 首次进入（无历史缓存）时填充演示缺陷记录，避免报告表为空
+  if (!dataSource.value?.length) {
+    dataSource.value = DEMO_DEFECTS.map((d) => ({
+      key: d.key,
+      type: d.type,
+      level: d.level,
+      position: { ...d.position },
+    }));
+  }
+});
 </script>
 
 <style lang="less" scoped>

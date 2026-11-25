@@ -22,8 +22,9 @@
 </template>
 <script setup lang="ts">
 const ASSET_BASE = import.meta.env.BASE_URL;
-import { getDetectionResult } from "@/modules/product/api/DetectionResult";
-import { debounce, loadLocationData } from "@/utils/tools";
+import { debounce, formatDateTime, loadLocationData } from "@/utils/tools";
+import { makeDemoMarkers, makeVisionSummary } from "../demoVisionData";
+import type { DetectionResultData } from "@/modules/product/types/DetectionResult";
 import { message } from "ant-design-vue";
 import { onMounted, ref, watch } from "vue";
 
@@ -75,7 +76,12 @@ async function onStart() {
     duration: 0,
   });
 
-  const results = await getDetectionResult();
+  // 检测摘要采用视觉质检口径，并带上本次检测的缺陷数量
+  const summary = makeVisionSummary(markers.value.length + 1);
+  const results: DetectionResultData = {
+    date: formatDateTime(new Date()),
+    columns: summary.columns as DetectionResultData["columns"],
+  };
   message.destroy("searchLoading");
   message.success("检测完成!");
   emits("search:result", results);
@@ -271,6 +277,10 @@ onMounted(() => {
 
   video.addEventListener("loadedmetadata", () => {
     resizeCanvas();
+    // 画布尺寸就绪后，若无标记点则用演示缺陷填充，保证画面有内容
+    if (!markers.value.length) {
+      markers.value = makeDemoMarkers(canvas.width, canvas.height);
+    }
     video.play();
     startDrawing();
   });
@@ -362,12 +372,16 @@ watch(
   }
 );
 onMounted(() => {
-  loadLocationData("detectionMarkers", markers);
+  const hasCache = loadLocationData("detectionMarkers_v2", markers);
   watch(markers, (newMarkers) => {
-    localStorage.setItem("detectionMarkers", JSON.stringify(newMarkers))
+    localStorage.setItem("detectionMarkers_v2", JSON.stringify(newMarkers))
   }, {
     deep: true,
   });
+  // 首次进入（无历史缓存）时预置演示标记点；画布尺寸就绪后还有一次兜底填充
+  if (!hasCache || !markers.value?.length) {
+    markers.value = makeDemoMarkers();
+  }
 });
 </script>
 <style scoped>
