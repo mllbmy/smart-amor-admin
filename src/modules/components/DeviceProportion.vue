@@ -2,75 +2,83 @@
     <BaseCharts :option="option" />
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed } from 'vue';
 import BaseCharts from './BaseCharts.vue';
+
+interface ProportionItem {
+    name: string;
+    value: number;
+    color?: string;
+}
+
 const props = defineProps({
+    // 由父组件传入各状态设备数量，例如 [{ name: '正常', value: 6, color: '#10b981' }]
     data: {
-        type: Object,
-        default: {},
+        type: Array as () => ProportionItem[],
+        default: () => [],
     },
-})
-const data = [
-    { value: 75, name: '正常', itemStyle: { color: '#00E676' } },   // Green
-    { value: 12, name: '停机', itemStyle: { color: '#FF3D00' } },   // Red
-    { value: 7, name: '未开机', itemStyle: { color: '#FFC107' } }, // Grey
-];
-const option = ref({
+});
+
+const items = computed<ProportionItem[]>(() => (Array.isArray(props.data) ? props.data : []));
+const totalValue = computed(() => items.value.reduce((sum, d) => sum + (Number(d.value) || 0), 0));
+
+const seriesData = computed(() =>
+    items.value.map((d) => ({
+        name: d.name,
+        value: Number(d.value) || 0,
+        itemStyle: { color: d.color || '#58D9F9' },
+    }))
+);
+
+const percentOf = (name: string) => {
+    const item = seriesData.value.find((d) => d.name === name);
+    if (!item || !totalValue.value) return 0;
+    return Math.round((item.value / totalValue.value) * 100);
+};
+
+const option = computed(() => ({
     title: {
-        text: '75%',
-        left: '20%', // Manually positioned to align with the center of the pie (which is left-shifted)
+        // 圆环中心展示"正常"占比
+        text: `${percentOf('正常')}%`,
+        left: '30%',
         top: 'center',
+        textAlign: 'center',
         textStyle: {
             color: '#fff',
             fontSize: 26,
-            fontWeight: 'bold'
-        }
+            fontWeight: 'bold',
+        },
     },
-
     tooltip: {
         trigger: 'item',
-        formatter: '{b}: {c}%'
+        formatter: '{b}: {c} 台',
     },
-
-    // The Legend on the right
     legend: {
         orient: 'vertical',
         right: '0%',
         top: 'center',
-        itemGap: 20, // Spacing between items
+        itemGap: 20,
         itemWidth: 14,
         itemHeight: 14,
         textStyle: {
             color: '#fff',
             fontSize: 16,
-            padding: [0, 0, 0, 10] // Add some padding between marker and text
+            padding: [0, 0, 0, 10],
         },
-        // Custom formatter to align name and value like the image: "Name  Value%"
-        formatter: function (name) {
-            const item = data.find(p => p.name === name);
-            return `${name}   ${item.value}%`;
-        }
+        formatter: (name: string) => `${name}   ${percentOf(name)}%`,
     },
-
     series: [
         {
-            name: 'Status',
+            name: '设备状态',
             type: 'pie',
-            radius: ['55%', '70%'], // Donut shape
-            center: ['30%', '50%'], // Shift chart to the left to make room for legend
+            radius: ['55%', '70%'],
+            center: ['30%', '50%'],
             avoidLabelOverlap: false,
-
-            // Hide label lines and labels on the chart itself
-            label: {
-                show: false,
-            },
-            labelLine: {
-                show: false
-            },
-
-            data: data
-        }
-    ]
-})
+            label: { show: false },
+            labelLine: { show: false },
+            data: seriesData.value,
+        },
+    ],
+}));
 </script>
 <style scoped></style>

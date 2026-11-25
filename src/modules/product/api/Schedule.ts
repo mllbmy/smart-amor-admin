@@ -49,7 +49,7 @@ export function getFakeData(): ScheduleData[] {
   const data: ScheduleData[] = [
     {
       key: "1",
-      device: "TM-01",
+      device: "TM-YJ-01",
       level: 1,
       deadline: "2026-09-01",
       efficiency: 0.8,
@@ -61,7 +61,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "2",
-      device: "TM-02",
+      device: "TM-YJ-02",
       level: 3,
       deadline: "2026-08-15",
       efficiency: 0.65,
@@ -73,7 +73,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "3",
-      device: "TM-03",
+      device: "TM-YJ-03",
       level: 2,
       deadline: "2026-10-10",
       efficiency: 0.92,
@@ -85,7 +85,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "4",
-      device: "TM-04",
+      device: "TM-YJ-04",
       level: 1,
       deadline: "2026-07-20",
       efficiency: 0.78,
@@ -97,7 +97,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "5",
-      device: "TM-05",
+      device: "TM-YJ-05",
       level: 4,
       deadline: "2026-11-05",
       efficiency: 0.45,
@@ -109,7 +109,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "6",
-      device: "TM-06",
+      device: "TM-YJ-06",
       level: 2,
       deadline: "2026-08-30",
       efficiency: 0.88,
@@ -121,7 +121,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "7",
-      device: "TM-07",
+      device: "TM-YJ-07",
       level: 1,
       deadline: "2026-09-15",
       efficiency: 0.76,
@@ -133,7 +133,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "8",
-      device: "TM-08",
+      device: "TM-YJ-08",
       level: 3,
       deadline: "2026-10-25",
       efficiency: 0.82,
@@ -145,7 +145,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "9",
-      device: "TM-09",
+      device: "TM-YJ-09",
       level: 2,
       deadline: "2026-07-10",
       efficiency: 0.91,
@@ -157,7 +157,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "10",
-      device: "TM-10",
+      device: "TM-YJ-10",
       level: 1,
       deadline: "2026-12-01",
       efficiency: 0.68,
@@ -169,7 +169,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "11",
-      device: "TM-11",
+      device: "TM-YJ-11",
       level: 4,
       deadline: "2026-08-05",
       efficiency: 0.52,
@@ -181,7 +181,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "12",
-      device: "TM-12",
+      device: "TM-YJ-12",
       level: 2,
       deadline: "2026-09-20",
       efficiency: 0.85,
@@ -193,7 +193,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "13",
-      device: "TM-13",
+      device: "TM-YJ-13",
       level: 1,
       deadline: "2026-11-15",
       efficiency: 0.79,
@@ -205,7 +205,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "14",
-      device: "TM-14",
+      device: "TM-YJ-14",
       level: 3,
       deadline: "2026-07-30",
       efficiency: 0.73,
@@ -217,7 +217,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "15",
-      device: "TM-15",
+      device: "TM-YJ-15",
       level: 2,
       deadline: "2026-10-05",
       efficiency: 0.89,
@@ -229,7 +229,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "16",
-      device: "TM-16",
+      device: "TM-YJ-16",
       level: 1,
       deadline: "2026-12-20",
       efficiency: 0.81,
@@ -241,7 +241,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "17",
-      device: "TM-17",
+      device: "TM-YJ-17",
       level: 4,
       deadline: "2026-08-25",
       efficiency: 0.48,
@@ -253,7 +253,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "18",
-      device: "TM-18",
+      device: "TM-YJ-18",
       level: 2,
       deadline: "2026-09-10",
       efficiency: 0.87,
@@ -265,7 +265,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "19",
-      device: "TM-19",
+      device: "TM-YJ-19",
       level: 1,
       deadline: "2026-11-30",
       efficiency: 0.75,
@@ -277,7 +277,7 @@ export function getFakeData(): ScheduleData[] {
     },
     {
       key: "20",
-      device: "TM-20",
+      device: "TM-YJ-20",
       level: 3,
       deadline: "2026-07-15",
       efficiency: 0.84,

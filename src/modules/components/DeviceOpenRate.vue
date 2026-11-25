@@ -2,7 +2,7 @@
   <BaseCharts :option="option" />
 </template>
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import BaseCharts from './BaseCharts.vue';
 const props = defineProps({
   chartStyle: {
@@ -27,11 +27,13 @@ const colors = [
 ];
 const dataValue = computed(() => {
   const { deviceOpenRateData } = props;
-  return Math.round(
-    (deviceOpenRateData.opened / deviceOpenRateData.total) * 100
-  );
+  const total = Number(deviceOpenRateData.total) || 0;
+  const opened = Number(deviceOpenRateData.opened) || 0;
+  if (!total) return 0; // 数据未就绪时避免 NaN
+  return Math.max(0, Math.min(100, Math.round((opened / total) * 100)));
 });
-const option = ref({
+// option 改为 computed：设备数据异步返回后仪表盘数值会同步刷新
+const option = computed(() => ({
   series: [
     {
       type: "gauge",
@@ -110,7 +112,7 @@ const option = ref({
       ],
     },
   ],
-});
+}));
 
 </script>
 <style scoped></style>

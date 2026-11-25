@@ -54,7 +54,7 @@
             </a-row>
             <a-row class="h-3/5 w-full">
               <a-col :span="12">
-                <DeviceProportion />
+                <DeviceProportion :data="deviceProportionData" />
               </a-col>
               <a-col :span="12">
                 <DeviceOpenRate :device-open-rate-data="deviceOpenRateData" />
@@ -197,37 +197,49 @@ const visualizedStyleOption = ref({
   pageSize: false,
 });
 
-const total = ref(36);
-const errorTotal = ref(4);
-const opened = ref(30);
+// 设备状态统计全部由 deviceInfo 实时推导，避免"总数/停机数"与设备清单对不上
+const total = ref(0);
+const errorTotal = ref(0);
+const warningTotal = ref(0);
+const opened = computed(() => Math.max(0, total.value - errorTotal.value));
 
-const deviceOpenRateData = computed(() => ({
-  total: total.value,
-  errorTotal: errorTotal.value,
-  opened: opened.value,
-  data: [
-    {
-      name: "设备数量",
-      value: total.value,
-      color: "#ccc",
-    },
-    {
-      name: "正常",
-      value: total.value - errorTotal.value,
-      color: "#10b981ee",
-    },
-    {
-      name: "停机",
-      value: errorTotal.value,
-      color: "#ea4335ee",
-    },
-    {
-      name: "未开机",
-      value: total.value - opened.value - errorTotal.value,
-      color: "#fcda56ee",
-    },
-  ],
-}));
+const deviceOpenRateData = computed(() => {
+  const t = total.value;
+  const w = warningTotal.value;
+  const e = errorTotal.value;
+  return {
+    total: t,
+    errorTotal: e,
+    opened: opened.value,
+    data: [
+      {
+        name: "设备数量",
+        value: t,
+        color: "#ccc",
+      },
+      {
+        name: "正常",
+        value: Math.max(0, t - w - e),
+        color: "#10b981ee",
+      },
+      {
+        name: "告警",
+        value: w,
+        color: "#fcda56ee",
+      },
+      {
+        name: "故障",
+        value: e,
+        color: "#ea4335ee",
+      },
+    ],
+  };
+});
+
+// 环形图只展示状态分布（不含"设备数量"这一总计项）
+const deviceProportionData = computed(() =>
+  deviceOpenRateData.value.data.filter((item) => item.name !== "设备数量")
+);
 
 const deviceInfo = ref();
 type DeviceStatus = {
@@ -314,9 +326,12 @@ function processDeviceStatus(device: Device) {
 async function fetchDeviceInfo() {
   try {
     deviceInfo.value = await getDeviceInfo();
-    deviceStatusRenderData.value = processDeviceData(
-      deviceInfo.value.devices
-    ).slice(0, 3);
+    const list = processDeviceData(deviceInfo.value.devices);
+    deviceStatusRenderData.value = list.slice(0, 3);
+    // KPI 由真实设备清单统计，保证与"设备状态面板""负荷均衡方案"一致
+    total.value = list.length;
+    errorTotal.value = list.filter((d) => d.status === "error").length;
+    warningTotal.value = list.filter((d) => d.status === "warning").length;
   } catch (error) {
     console.error("获取设备信息失败:", error);
   }
@@ -470,37 +485,73 @@ const IconTool = () =>
     ]
   );
 
-const aiSuggestions = ref([
-  {
-    title: "异常预警: TM-YJ-02",
-    time: "刚刚",
-    content: "监测到主轴温度持续处于85°C高位，超过阈值(80°C)。",
-    suggestions: ["检查冷却液循环泵压力", "暂停作业10分钟进行被动散热"],
-    styleClass:
-      "bg-red-950/20 border-red-500/30 hover:bg-red-950/40 ai-alert-card",
-    titleColor: "text-red-400",
-    icon: IconAlert,
-  },
-  {
+// AI 建议卡片的内容由当前设备状态生成，避免与看板数值/设备描述不一致
+const SUGGESTION_BY_METRIC: Record<string, string[]> = {
+  温度: ["检查冷却液循环泵压力与流量", "降低主轴转速并观察温升趋势"],
+  压力: ["检查真空泵与腔体密封圈", "暂停作业排查气路泄漏点"],
+  真空度: ["检查真空泵抽速是否衰减", "紧固腔体密封件并复测"],
+};
+
+const aiSuggestions = computed(() => {
+  const list = deviceInfo.value?.devices
+    ? processDeviceData(deviceInfo.value.devices)
+    : [];
+  const cards: any[] = [];
+  const fault = list.filter((d) => d.status === "error");
+  const warning = list.filter((d) => d.status === "warning");
+
+  if (fault.length) {
+    const dev = fault[0];
+    const metric = Object.keys(SUGGESTION_BY_METRIC).find((k) => dev.msg.includes(k));
+    cards.push({
+      title: `异常预警: ${dev.id}`,
+      time: "刚刚",
+      content: `监测到 ${dev.id} ${dev.msg}，已超过工艺阈值，建议立即处置。`,
+      suggestions: SUGGESTION_BY_METRIC[metric || "温度"],
+      styleClass:
+        "bg-red-950/20 border-red-500/30 hover:bg-red-950/40 ai-alert-card",
+      titleColor: "text-red-400",
+      icon: IconAlert,
+    });
+  } else {
+    cards.push({
+      title: "运行状态良好",
+      time: "刚刚",
+      content: "当前无设备处于故障状态，工艺参数均在阈值范围内。",
+      styleClass:
+        "bg-emerald-950/20 border-emerald-500/30 hover:bg-emerald-950/40",
+      titleColor: "text-emerald-400",
+      icon: IconAlert,
+    });
+  }
+
+  cards.push({
     title: "效能优化",
     time: "10分钟前",
-    content: '检测到 2 台设备处于"未开机"状态，但 TM-04 负载已达 95%。',
+    content: warning.length
+      ? `检测到 ${warning.length} 台设备处于告警状态（${warning
+          .map((d) => d.id)
+          .join("、")}），可迁移部分排程任务以均衡负载。`
+      : "设备负载分布均衡，暂无需调整排程。",
     buttons: ["一键均衡负载", "查看详情"],
     styleClass: "bg-blue-950/20 border-blue-500/30 hover:bg-blue-950/40",
     titleColor: "text-blue-400",
     icon: IconZap,
-  },
-  {
+  });
+
+  cards.push({
     title: "维保提醒",
     time: "1小时前",
     content:
-      "TM-01 累计运行时长即将达到 200 小时保养周期。建议在周五停机时段安排刀具检查。",
+      "TM-YJ-01 累计运行时长即将达到 200 小时保养周期。建议在周五停机时段安排刀具检查。",
     styleClass:
       "bg-emerald-950/20 border-emerald-500/30 hover:bg-emerald-950/40",
     titleColor: "text-emerald-400",
     icon: IconTool,
-  },
-]);
+  });
+
+  return cards;
+});
 onMounted(() => {
   loadLocationData("scheduleData", scheduleData);
   fetchDeviceInfo();

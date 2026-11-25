@@ -29,19 +29,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-const itemsData = ref();
+import { computed } from "vue";
 const props = defineProps({
   deviceOpenRateData: {
     type: Object,
-    default: {},
+    default: () => ({}),
   },
 });
 
-onMounted(() => {
-  itemsData.value = props.deviceOpenRateData.data;
-  
-});
+// 设备数据是异步加载的，需用 computed 跟随 props 变化；
+// 原先在 onMounted 里一次性赋值，首屏之后数值不会再更新。
+const itemsData = computed<any[]>(() => props.deviceOpenRateData?.data || []);
 </script>
 <style scoped>
 .card {

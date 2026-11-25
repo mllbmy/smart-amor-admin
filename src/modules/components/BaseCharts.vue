@@ -2,7 +2,7 @@
     <div id="charts" :style="props.chartStyle" ref="charts"></div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 const charts = ref(null);
 const props = defineProps({
@@ -17,23 +17,39 @@ const props = defineProps({
     },
     option: {
         type: Object,
-        default: {}
+        default: () => ({})
     },
 });
+
+// 保留实例，便于在 option 变化时重绘（原先只在挂载时 setOption 一次，
+// 异步数据返回后图表数值不会更新）
+let myChart: any = null;
+let observer: ResizeObserver | null = null;
+
 onMounted(() => {
     import("echarts").then((echarts) => {
-        const myChart = echarts.init(charts.value, null, {
-            renderer: 'canvas'                                                                                                                                               
-        });
+        if (!charts.value) return;
+        myChart = echarts.init(charts.value, null, { renderer: "canvas" });
         myChart.setOption(props.option);
-        let observer = new ResizeObserver(function () {
-            setTimeout(() => {
-                myChart.resize();
-            }, 800);
+        observer = new ResizeObserver(() => {
+            setTimeout(() => myChart && myChart.resize(), 800);
         });
         observer.observe(charts.value);
     });
+});
 
+watch(
+    () => props.option,
+    (val) => {
+        if (myChart && val) myChart.setOption(val, true);
+    },
+    { deep: true }
+);
+
+onBeforeUnmount(() => {
+    if (observer) observer.disconnect();
+    if (myChart) myChart.dispose();
+    myChart = null;
 });
 </script>
 <style scoped></style>
