@@ -166,32 +166,27 @@ import html2Canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export const htmlToPdf = {
-  getPdf(title, dom) {
-    // 1. 构建 DOM 树
+  getPdf(title: string, dom: HTMLElement) {
     if (!dom) return;
-    let pdfContent = dom;
-    pdfContent.ownerDocument.defaultView.innerHeight = 1000;
-    pdfContent.ownerDocument.defaultView.innerWidth = 1000;
-    // 2. Canvas 渲染图像
-    html2Canvas(pdfContent, {
+    // 注意：window.innerWidth / innerHeight 为只读属性，
+    // ES module（严格模式）下赋值会抛 TypeError，故不再修改视口尺寸。
+    html2Canvas(dom, {
       logging: false,
       useCORS: true,
-      scale: 2,//按比例增加分辨率
-    }).then((canvas) => {
-      // 3. jsPDF 导出 pdf文件
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-      var pdf = new jsPDF("p", "mm", "a4");
-      const a4w = 190;
-      const a4h = 277;
-      pdf.addImage(
-        imgData,
-        "JPEG",
-        10,
-        10,
-        a4w,
-        Math.min(a4h, (a4w * canvas.height) / canvas.width)
-      );
-      pdf.save(title + ".pdf");
-    });
+      backgroundColor: "#ffffff",
+      scale: 2, // 按比例增加分辨率
+    })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const a4w = 190;
+        const a4h = 277;
+        const imgH = Math.min(a4h, (a4w * canvas.height) / canvas.width);
+        pdf.addImage(imgData, "JPEG", 10, 10, a4w, imgH);
+        pdf.save(title + ".pdf");
+      })
+      .catch((err) => {
+        console.error("PDF 导出失败:", err);
+      });
   },
 };

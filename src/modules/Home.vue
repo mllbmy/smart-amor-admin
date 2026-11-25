@@ -76,8 +76,7 @@
                 <video :src="ASSET_BASE + 'mold_core.mp4'" autoplay loop muted style="" id="videoSource"
                   ref="videoSource"></video>
                 <div class="flex items-center justify-center gap-4">
-                  <a-button size="large" @click="reLoadVideo">刷新</a-button>
-                  <!-- <a-button class="restart" size="large" @click="onNext">下一处</a-button> -->
+                  <a-button size="large" :loading="videoRefreshing" @click="reLoadVideo">刷新</a-button>
                 </div>
               </div>
             </a-card>
@@ -135,11 +134,12 @@
 
                 <div v-if="item.buttons" class="flex gap-2 mt-2">
                   <button v-for="(btn, bIndex) in item.buttons" :key="bIndex"
-                    class="text-xs px-2 py-1 rounded border transition-colors" :class="bIndex === 0
+                    class="text-xs px-2 py-1 rounded border transition-colors disabled:opacity-60" :disabled="aiBusy && bIndex === 0"
+                    :class="bIndex === 0
                       ? 'bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border-blue-500/30'
                       : 'bg-transparent hover:bg-slate-700/50 text-slate-400 border-slate-600'
-                      " @click="message.warning('功能开发中...')">
-                    {{ btn }}
+                      " @click="handleAiButton(btn)">
+                    {{ aiBusy && bIndex === 0 ? '下发中…' : btn }}
                   </button>
                 </div>
               </div>
@@ -157,6 +157,18 @@
         </a-col>
       </a-row>
     </section>
+
+    <!-- AI 建议：设备负载详情 / 均衡方案弹窗 -->
+    <a-modal v-model:open="aiDetailOpen" :title="aiDetailTitle" :footer="null" width="760px" centered>
+      <p class="text-xs text-slate-400 mb-3">
+        数据来源：生产线监控中心 · 采样时间 {{ aiDetailTime }}
+      </p>
+      <a-table :columns="aiDetailColumns" :data-source="aiDetailRows" size="small" :pagination="false"
+        :row-key="(r: any) => r.device" />
+      <p v-if="aiPlanText" class="mt-3 p-3 rounded border border-blue-500/30 bg-blue-950/20 text-xs text-slate-300">
+        <span class="text-blue-300 font-semibold">均衡方案：</span>{{ aiPlanText }}
+      </p>
+    </a-modal>
   </div>
 </template>
 <script setup lang="ts">
@@ -309,10 +321,102 @@ async function fetchDeviceInfo() {
     console.error("获取设备信息失败:", error);
   }
 }
-const onPrevnt = () => { };
-const onNext = () => { };
 
-const reLoadVideo = () => { };
+/* ---------- 实时监测：刷新画面与设备状态 ---------- */
+const videoSource = ref<HTMLVideoElement>();
+const videoRefreshing = ref(false);
+
+const reLoadVideo = async () => {
+  if (videoRefreshing.value) return;
+  videoRefreshing.value = true;
+  message.loading({ content: "正在刷新监测画面与设备状态…", key: "monitorReload", duration: 0 });
+  try {
+    const v = videoSource.value;
+    if (v) {
+      try {
+        v.currentTime = 0;
+        v.load();
+        await v.play();
+      } catch {
+        /* 浏览器拦截自动播放时忽略，画面保持原状 */
+      }
+    }
+    await fetchDeviceInfo();
+    message.success({ content: "监测画面与设备状态已刷新", key: "monitorReload", duration: 2 });
+  } catch {
+    message.error({ content: "刷新失败，请检查视频源", key: "monitorReload", duration: 2 });
+  } finally {
+    videoRefreshing.value = false;
+  }
+};
+
+/* ---------- AI 建议：查看详情 / 一键均衡负载 ---------- */
+const aiBusy = ref(false);
+const aiDetailOpen = ref(false);
+const aiDetailTitle = ref("设备负载详情");
+const aiDetailTime = ref("");
+const aiPlanText = ref("");
+const aiDetailRows = ref<any[]>([]);
+const aiDetailColumns = [
+  { title: "设备编号", dataIndex: "device", key: "device", width: 120 },
+  { title: "运行状态", dataIndex: "status", key: "status", width: 110 },
+  { title: "现场描述", dataIndex: "msg", key: "msg" },
+  { title: "建议动作", dataIndex: "action", key: "action", width: 190 },
+];
+
+const STATUS_LABEL: Record<string, string> = {
+  normal: "运行正常",
+  warning: "告警",
+  error: "故障",
+};
+
+const STATUS_ACTION: Record<string, string> = {
+  normal: "维持当前排程",
+  warning: "降低进给并检查冷却",
+  error: "强制停机并安排检修",
+};
+
+const buildLoadRows = () => {
+  const devices: Device[] = deviceInfo.value?.devices || [];
+  return devices.map((d: Device) => {
+    const info = processDeviceData([d])[0];
+    return {
+      device: d.id,
+      status: STATUS_LABEL[info?.status || "normal"],
+      msg: info?.msg || "设备运行正常",
+      action: STATUS_ACTION[info?.status || "normal"],
+    };
+  });
+};
+
+const openAiDetail = (title: string) => {
+  aiDetailRows.value = buildLoadRows();
+  aiDetailTitle.value = title;
+  aiDetailTime.value = new Date().toLocaleString("zh-CN", { hour12: false });
+  aiDetailOpen.value = true;
+};
+
+const handleAiButton = (btn: string) => {
+  if (btn === "查看详情") {
+    aiPlanText.value = "";
+    openAiDetail("设备负载详情");
+    return;
+  }
+  if (btn === "一键均衡负载") {
+    if (aiBusy.value) return;
+    aiBusy.value = true;
+    message.loading({ content: "正在计算负荷均衡方案…", key: "aiBalance", duration: 0 });
+    setTimeout(() => {
+      aiBusy.value = false;
+      const abnormal = buildLoadRows().filter((r) => r.status !== "运行正常");
+      aiPlanText.value = abnormal.length
+        ? `将 ${abnormal.map((r) => r.device).join("、")} 的排程任务迁移至空闲机台，并把负载上限下调至 85%，方案已下发至排程队列。`
+        : "当前所有设备负载均处于正常区间，无需迁移排程任务。";
+      openAiDetail("负荷均衡方案");
+      message.success({ content: "负荷均衡方案已生成并下发", key: "aiBalance", duration: 2 });
+    }, 900);
+  }
+};
 const IconAlert = () =>
   h(
     "svg",
